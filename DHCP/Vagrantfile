@@ -1,0 +1,54 @@
+$spt_programas = <<-SCRIPT
+apt-get install net-tools 
+apt-get install nano
+SCRIPT
+
+Vagrant.configure("2") do |config|  
+  config.vm.box = "aspyatkin/ubuntu-20.04-server" 
+    
+  
+  config.vm.define "pc01" do |vm|
+
+    vm.vm.provision "shell",
+    inline: $spt_programas
+
+    vm.vm.provision "shell",
+    inline: "/vagrant/ConfRede/config-rede.sh -d && cp /vagrant/ConfRede/01-netcfg.yaml /etc/netplan"
+
+    vm.vm.provider "virtualbox" do |v|
+      v.memory = 300
+      v.cpus = 1
+    end
+  end
+
+  config.vm.define "pc02" do |vm|
+
+    vm.vm.provision "shell",
+    inline: $spt_programas
+
+    vm.vm.provision "shell",
+    inline: "/vagrant/ConfRede/config-rede.sh -d && cp /vagrant/ConfRede/01-netcfg.yaml /etc/netplan"
+
+    vm.vm.provider "virtualbox" do |v|
+      v.memory = 300
+      v.cpus = 1
+    end
+  end
+
+  config.vm.define "dhcp_server" do |vm|
+
+    ## Instala os programas padroes de todas as máquinas
+    vm.vm.provision "shell",
+    inline: $spt_programas
+
+    ## Configuração e instalação particular da máquina
+    vm.vm.provision "shell",
+    inline: "/vagrant/ConfRede/config-rede.sh -d && cp /vagrant/ConfRede/01-netcfg.yaml /etc/netplan && cp /vagrant/ConfRede/dhcpd.conf /etc/dhcp/ && apt install isc-dhcp-server -y"
+
+    vm.vm.provider "virtualbox" do |v|
+      v.memory = 300
+      v.cpus = 1
+    end
+  end
+
+end
